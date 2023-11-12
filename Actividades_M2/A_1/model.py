@@ -31,7 +31,7 @@ class RandomModel(Model):
         #list with all the boarder positions
         border = [(0,i) for i in range(width)] + [(width-1,i) for i in range(width)] + [(i,0) for i in range(height)] + [(i,height-1) for i in range(height)]
         #add agents to random empty boarder cells
-        for i in range(5):
+        for i in range(N):
             agent = RandomAgent(i, self)
             self.schedule.add(agent)
             pos = border[i]

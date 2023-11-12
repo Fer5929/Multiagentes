@@ -7,7 +7,7 @@ class RandomAgent(Agent):
         unique_id: Agent's ID 
         direction: Randomly chosen direction chosen from one of eight directions
     """
-    def __init__(self, unique_id, model, battery=100):
+    def __init__(self, unique_id, model, battery=20):
         """
         Creates a new random agent.
         Args:
@@ -18,30 +18,38 @@ class RandomAgent(Agent):
         self.direction = 4
         self.steps_taken = 0
         self.battery = battery
+        #self.initial_position = self.pos
+    
+    def calculate_distance(self):
+        return abs(self.pos[0] - self.initial_position[0]) + abs(self.pos[1] - self.initial_position[1])
+    def is_battery_depleted(self):
+        return self.calculate_distance() >= self.battery
+
+
 
     def move(self):
-        """Determines if the agent can move in the direction that was chosen."""
+        # Determine if the agent can move in the direction that was chosen.
         possible_steps = self.model.grid.get_neighborhood(
         self.pos,
         moore=True,
         include_center=True
-
     )
-    
+  
+
         # Checks which grid cells are empty
         freeSpaces = list(map(self.model.grid.is_cell_empty, possible_steps))
-    
+
         # Checks which grid cells contain DirtyAgents
         dirtySpaces = [any(isinstance(agent, DirtyAgent) for agent in self.model.grid.get_cell_list_contents(pos)) for pos in possible_steps]
 
         # Combine freeSpaces and dirtySpaces to create a list of valid moves
         valid_moves = [p for p, f, d in zip(possible_steps, freeSpaces, dirtySpaces) if f or d]
-    
+
         # Check if there are any valid moves
         if valid_moves:
             # Check if there's a DirtyAgent in the valid moves
             dirty_move = [move for move in valid_moves if any(isinstance(agent, DirtyAgent) for agent in self.model.grid.get_cell_list_contents(move))]
-        
+
             if dirty_move:
                 # Prioritize moving to a cell with a DirtyAgent
                 next_move = self.random.choice(dirty_move)
@@ -50,13 +58,16 @@ class RandomAgent(Agent):
                 empty_cells = [move for move in valid_moves if self.model.grid.is_cell_empty(move)]
                 next_move = self.random.choice(empty_cells) if empty_cells else self.pos
         else:
-            # If there are no valid moves, stay in the current cell
+         # If there are no valid moves, stay in the current cell
             next_move = self.pos
-    
+
+       
+        
         # Now move:
         self.model.grid.move_agent(self, next_move)
         self.steps_taken += 1
         self.battery -= 1
+
 
     def step(self):
         """ 
