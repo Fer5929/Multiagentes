@@ -19,29 +19,41 @@ class RandomAgent(Agent):
         self.steps_taken = 0
 
     def move(self):
-        """ 
-        Determines if the agent can move in the direction that was chosen
-        """
+        """Determines if the agent can move in the direction that was chosen."""
         possible_steps = self.model.grid.get_neighborhood(
-            self.pos,
-            moore=True, # Boolean for whether to use Moore neighborhood (including diagonals) or Von Neumann (only up/down/left/right).
-            include_center=True) 
-        
-       # Checks which grid cells are empty
+        self.pos,
+        moore=True,
+        include_center=True
+    )
+    
+        # Checks which grid cells are empty
         freeSpaces = list(map(self.model.grid.is_cell_empty, possible_steps))
-
+    
         # Checks which grid cells contain DirtyAgents
         dirtySpaces = [any(isinstance(agent, DirtyAgent) for agent in self.model.grid.get_cell_list_contents(pos)) for pos in possible_steps]
 
         # Combine freeSpaces and dirtySpaces to create a list of valid moves
-        next_moves = [p for p, f, d in zip(possible_steps, freeSpaces, dirtySpaces) if f or d]
-
-       
-        next_move = self.random.choice(next_moves)
-
+        valid_moves = [p for p, f, d in zip(possible_steps, freeSpaces, dirtySpaces) if f or d]
+    
+        # Check if there are any valid moves
+        if valid_moves:
+            # Check if there's a DirtyAgent in the valid moves
+            dirty_move = [move for move in valid_moves if any(isinstance(agent, DirtyAgent) for agent in self.model.grid.get_cell_list_contents(move))]
+        
+            if dirty_move:
+                # Prioritize moving to a cell with a DirtyAgent
+                next_move = self.random.choice(dirty_move)
+            else:
+                # If no DirtyAgents in valid moves, move randomly to an empty cell
+                empty_cells = [move for move in valid_moves if self.model.grid.is_cell_empty(move)]
+                next_move = self.random.choice(empty_cells) if empty_cells else self.pos
+        else:
+            # If there are no valid moves, stay in the current cell
+            next_move = self.pos
+    
         # Now move:
         self.model.grid.move_agent(self, next_move)
-        self.steps_taken+=1
+        self.steps_taken += 1
 
     def step(self):
         """ 
