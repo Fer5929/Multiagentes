@@ -1,4 +1,4 @@
-from model import RandomModel, ObstacleAgent, DirtyAgent
+from model import RandomModel, ObstacleAgent, DirtyAgent, ChargerAgent
 from mesa.visualization import CanvasGrid, BarChartModule
 from mesa.visualization import ModularServer
 
@@ -8,7 +8,7 @@ def agent_portrayal(agent):
     portrayal = {"Shape": "circle",
                  "Filled": "true",
                  "Layer": 0,
-                 "Color": "red",
+                 "Color": "pink",
                  "r": 0.5}
 
     if (isinstance(agent, ObstacleAgent)):
@@ -18,6 +18,12 @@ def agent_portrayal(agent):
     
     elif isinstance(agent, DirtyAgent):  # Add this condition for DirtyAgent
         portrayal["Color"] = "lightgreen"
+        portrayal["Layer"] = 0
+        portrayal["w"] = 1.0  # Width of the square
+        portrayal["h"] = 1.0  # Height of the square
+    
+    elif isinstance(agent, ChargerAgent):  # Add this condition for DirtyAgent
+        portrayal["Color"] = "orange"
         portrayal["Layer"] = 0
         portrayal["w"] = 1.0  # Width of the square
         portrayal["h"] = 1.0  # Height of the square

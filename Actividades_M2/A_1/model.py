@@ -1,8 +1,9 @@
+import random
 from mesa import Model, agent
 from mesa.time import RandomActivation
 from mesa.space import MultiGrid
 from mesa import DataCollector
-from agent import RandomAgent, ObstacleAgent, DirtyAgent
+from agent import RandomAgent, ObstacleAgent, DirtyAgent, ChargerAgent
 
 class RandomModel(Model):
     """ 
@@ -27,19 +28,19 @@ class RandomModel(Model):
 
         # Function to generate random positions
         pos_gen = lambda w, h: (self.random.randrange(w), self.random.randrange(h))
+        #list with all the boarder positions
+        border = [(0,i) for i in range(width)] + [(width-1,i) for i in range(width)] + [(i,0) for i in range(height)] + [(i,height-1) for i in range(height)]
+        #add agents to random empty boarder cells
+        for i in range(5):
+            agent = RandomAgent(i, self)
+            self.schedule.add(agent)
+            pos = border[i]
+            while not self.grid.is_cell_empty(pos):
+                pos = border[i]
+            self.grid.place_agent(agent, pos)
 
-        # Add the agent to a random empty grid cell
-        for i in range(self.num_agents):
-
-            a = RandomAgent(i+1000, self) 
-            self.schedule.add(a)
-
-            pos = pos_gen(self.grid.width, self.grid.height)
-
-            while (not self.grid.is_cell_empty(pos)):
-                pos = pos_gen(self.grid.width, self.grid.height)
-
-            self.grid.place_agent(a, pos)
+        
+       
         # Add obstacles to random empty grid cells
         for i in range(20):
             obs = ObstacleAgent(i + 2000, self)
@@ -57,6 +58,14 @@ class RandomModel(Model):
             while not self.grid.is_cell_empty(pos):
                 pos = pos_gen(self.grid.width, self.grid.height)
             self.grid.place_agent(dirty, pos)
+        
+        # Add Charger to same cells as RandomAgents
+        for agent in self.schedule.agents:
+            if isinstance(agent, RandomAgent):
+                charger = ChargerAgent(agent.unique_id + 4000, self)
+                self.schedule.add(charger)
+                self.grid.place_agent(charger, agent.pos)
+
         
         self.datacollector.collect(self)
 

@@ -7,7 +7,7 @@ class RandomAgent(Agent):
         unique_id: Agent's ID 
         direction: Randomly chosen direction chosen from one of eight directions
     """
-    def __init__(self, unique_id, model):
+    def __init__(self, unique_id, model, battery=100):
         """
         Creates a new random agent.
         Args:
@@ -17,6 +17,7 @@ class RandomAgent(Agent):
         super().__init__(unique_id, model)
         self.direction = 4
         self.steps_taken = 0
+        self.battery = battery
 
     def move(self):
         """Determines if the agent can move in the direction that was chosen."""
@@ -24,6 +25,7 @@ class RandomAgent(Agent):
         self.pos,
         moore=True,
         include_center=True
+
     )
     
         # Checks which grid cells are empty
@@ -54,6 +56,7 @@ class RandomAgent(Agent):
         # Now move:
         self.model.grid.move_agent(self, next_move)
         self.steps_taken += 1
+        self.battery -= 1
 
     def step(self):
         """ 
@@ -93,4 +96,14 @@ class DirtyAgent(Agent):
         if random_agents:
             self.model.grid.remove_agent(self)
             self.model.schedule.remove(self)
+
+class ChargerAgent(Agent):
+    """
+    Charger agent. Charges the agent while standing on it.
+    """
+    def __init__(self, unique_id, model):
+        super().__init__(unique_id, model)
+
+    def step(self):
+        pass  
             
