@@ -12,7 +12,7 @@ class RandomModel(Model):
         N: Number of agents in the simulation
         height, width: The size of the grid to model
     """
-    def __init__(self, N, width, height):
+    def __init__(self, N, width, height, T):
         self.num_agents = N
         # Multigrid is a special type of grid where each cell can contain multiple agents.
         self.grid = MultiGrid(width,height,torus = False) 
@@ -25,6 +25,8 @@ class RandomModel(Model):
         self.datacollector = DataCollector( 
         agent_reporters={"Steps": lambda a: a.steps_taken if isinstance(a, RandomAgent) else 0})
 
+        self.T = T
+        self.time=T
 
         # Function to generate random positions
         pos_gen = lambda w, h: (self.random.randrange(w), self.random.randrange(h))
@@ -70,6 +72,11 @@ class RandomModel(Model):
         self.datacollector.collect(self)
 
     def step(self):
-        '''Advance the model by one step.'''
+        # Check stopping conditions
+        if self.time <= 0 or not any(isinstance(agent, DirtyAgent) for agent in self.schedule.agents):
+            self.running = False
+            return
+        print(f"Time remaining: {self.time}")  # Print T on the screen
         self.schedule.step()
         self.datacollector.collect(self)
+        self.time -= 1
