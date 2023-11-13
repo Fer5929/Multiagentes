@@ -12,8 +12,9 @@ class RandomModel(Model):
         N: Number of agents in the simulation
         height, width: The size of the grid to model
     """
-    def __init__(self, N, width, height, T):
+    def __init__(self, N, width, height, T, initial_num_dirty):
         self.num_agents = N
+        self.initial_num_dirty = initial_num_dirty
         # Multigrid is a special type of grid where each cell can contain multiple agents.
         self.grid = MultiGrid(width,height,torus = False) 
 
@@ -23,7 +24,8 @@ class RandomModel(Model):
         self.running = True 
 
         self.datacollector = DataCollector( 
-        agent_reporters={"Steps": lambda a: a.steps_taken if isinstance(a, RandomAgent) else 0})
+            agent_reporters={"Steps": lambda a: a.steps_taken if isinstance(a, RandomAgent) else 0},
+        )
 
         self.T = T
         self.time=T
@@ -53,7 +55,7 @@ class RandomModel(Model):
             self.grid.place_agent(obs, pos)
 
         # Add dirty cells to random empty grid cells
-        for i in range(10):
+        for i in range(initial_num_dirty):
             dirty = DirtyAgent(i + 3000, self)  # Adjust the unique_id range
             self.schedule.add(dirty)
             pos = pos_gen(self.grid.width, self.grid.height)
@@ -80,3 +82,5 @@ class RandomModel(Model):
         self.schedule.step()
         self.datacollector.collect(self)
         self.time -= 1
+
+    
