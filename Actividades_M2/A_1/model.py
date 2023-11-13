@@ -41,6 +41,7 @@ class RandomModel(Model):
             pos = border[i]
             while not self.grid.is_cell_empty(pos):
                 pos = border[i]
+            agent.set_initial_position(pos)
             self.grid.place_agent(agent, pos)
 
         
