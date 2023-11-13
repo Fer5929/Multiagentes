@@ -1,5 +1,5 @@
 from model import RandomModel, ObstacleAgent, DirtyAgent, ChargerAgent
-from mesa.visualization import CanvasGrid, BarChartModule
+from mesa.visualization import CanvasGrid, BarChartModule, TextElement
 from mesa.visualization import ModularServer
 
 def agent_portrayal(agent):
@@ -38,7 +38,11 @@ bar_chart = BarChartModule(
     [{"Label":"Steps", "Color":"#AA0000"}], 
     scope="agent", sorting="ascending", sort_by="Steps")
 
-server = ModularServer(RandomModel, [grid, bar_chart], "Random Agents", model_params)
+class TimeElement(TextElement):
+    def render(self, model):
+        return f"Time: {model.time}"
+    
+server = ModularServer(RandomModel, [TimeElement(),grid, bar_chart], "Random Agents", model_params)
                        
 server.port = 8521 # The default
 server.launch()
