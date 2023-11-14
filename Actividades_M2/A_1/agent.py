@@ -49,7 +49,7 @@ class RandomAgent(Agent):
                 agents_in_cell = self.model.grid.get_cell_list_contents([self.pos])
                 charger_agent = [agent for agent in agents_in_cell if isinstance(agent, ChargerAgent)]
                 if charger_agent:
-                    while self.battery<20:
+                    while self.battery<100:
                         print("charging",{self.battery})
                         self.battery += 5
                         self.steps -=1
