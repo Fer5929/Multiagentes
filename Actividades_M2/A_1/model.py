@@ -33,11 +33,13 @@ class RandomModel(Model):
         # Function to generate random positions
         pos_gen = lambda w, h: (self.random.randrange(w), self.random.randrange(h))
         #list with all the boarder positions
-        border = [(0,i) for i in range(width)] + [(width-1,i) for i in range(width)] + [(i,0) for i in range(height)] + [(i,height-1) for i in range(height)]
+        border = [(x,y) for y in range(height) for x in range(width) if y in [0, height-1] or x in [0, width - 1]]
         #add agents to random empty boarder cells
+        random.shuffle(border)
         for i in range(N):
             agent = RandomAgent(i, self)
             self.schedule.add(agent)
+            rand=random.randint(0,len(border)-1)
             pos = border[i]
             while not self.grid.is_cell_empty(pos):
                 pos = border[i]
