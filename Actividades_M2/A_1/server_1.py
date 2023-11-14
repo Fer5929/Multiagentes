@@ -39,6 +39,9 @@ bar_chart = BarChartModule(
     [{"Label":"Steps", "Color":"pink"}], 
     scope="agent", sorting="ascending", sort_by="Steps")
 
+
+
+
 class TimeElement(TextElement):
     def render(self, model):
         return f"Time: {model.time}"

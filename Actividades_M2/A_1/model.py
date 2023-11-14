@@ -24,7 +24,7 @@ class RandomModel(Model):
         self.running = True 
 
         self.datacollector = DataCollector( 
-            agent_reporters={"Steps": lambda a: a.steps_taken if isinstance(a, RandomAgent) else 0},
+            agent_reporters={"Steps": lambda a: a.steps if isinstance(a, RandomAgent) else 0},
         )
 
         self.T = T

@@ -8,7 +8,7 @@ class RandomAgent(Agent):
         unique_id: Agent's ID 
         direction: Randomly chosen direction chosen from one of eight directions
     """
-    def __init__(self, unique_id, model, battery=100):
+    def __init__(self, unique_id, model, battery=20, steps=0):
         """
         Creates a new random agent.
         Args:
@@ -21,6 +21,7 @@ class RandomAgent(Agent):
         self.battery = battery
         #variable to store the initial position
         self.initial_position = None
+        self.steps = steps
     
     def set_initial_position(self, pos):
         # Set the initial position when the agent is placed on the grid
@@ -32,7 +33,7 @@ class RandomAgent(Agent):
 
     def move(self):
 
-        if self.battery<=26:
+        if self.battery<=10:
             print(self.initial_position)
             if self.pos != self.initial_position:
                 # Find the next step to move towards the initial position
@@ -40,6 +41,7 @@ class RandomAgent(Agent):
                 if self.model.grid.is_cell_empty(next_move) or self.check_for_obstacle(next_move):
                     self.model.grid.move_agent(self, next_move)
                     self.battery -= 1
+                    
             else:
                 next_move = self.initial_position
                 #If the agent is in same cell as Charger
@@ -50,6 +52,7 @@ class RandomAgent(Agent):
                     while self.battery<20:
                         print("charging",{self.battery})
                         self.battery += 5
+                        self.steps -=1
                         next_move = self.initial_position
         else:
         # Determine if the agent can move in the direction that was chosen.
@@ -91,6 +94,8 @@ class RandomAgent(Agent):
         self.model.grid.move_agent(self, next_move)
         self.steps_taken += 1
         self.battery -= 1
+        self.steps += 1
+        print(self.steps)
         
     def find_next_step_to_initial(self):
         # Implement BFS to find the next step towards the initial position
