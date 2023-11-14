@@ -43,10 +43,14 @@ class RandomAgent(Agent):
             else:
                 next_move = self.initial_position
                 #If the agent is in same cell as Charger
-                #agents_in_cell = self.model.grid.get_cell_list_contents([self.pos])
-                #charger_agent = [agent for agent in agents_in_cell if isinstance(agent, ChargerAgent)]
-                #if charger_agent:
-                    #self.battery += 5
+                print(self.battery)
+                agents_in_cell = self.model.grid.get_cell_list_contents([self.pos])
+                charger_agent = [agent for agent in agents_in_cell if isinstance(agent, ChargerAgent)]
+                if charger_agent:
+                    while self.battery<20:
+                        print("charging",{self.battery})
+                        self.battery += 5
+                        next_move = self.initial_position
         else:
         # Determine if the agent can move in the direction that was chosen.
             possible_steps = self.model.grid.get_neighborhood(
@@ -55,7 +59,7 @@ class RandomAgent(Agent):
             include_center=True
         )
   
-
+            
             # Checks which grid cells are empty
             freeSpaces = list(map(self.model.grid.is_cell_empty, possible_steps))
 
