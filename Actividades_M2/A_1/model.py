@@ -51,7 +51,7 @@ class RandomModel(Model):
             obs = ObstacleAgent(i + 2000, self)
             self.schedule.add(obs)
             pos = pos_gen(self.grid.width, self.grid.height)
-            while not self.grid.is_cell_empty(pos):
+            while not self.grid.is_cell_empty(pos) or self.is_agent_nearby(pos):
                 pos = pos_gen(self.grid.width, self.grid.height)
             self.grid.place_agent(obs, pos)
 
@@ -83,5 +83,21 @@ class RandomModel(Model):
         self.schedule.step()
         self.datacollector.collect(self)
         self.time -= 1
+    
+    def is_agent_nearby(self, pos):
+        neighbors = self.grid.get_neighborhood(
+            pos,
+            moore=True,
+            include_center=False
+    )
+    
+        for neighbor in neighbors:
+            agents_in_cell = self.grid.get_cell_list_contents([neighbor])
+            for agent in agents_in_cell:
+                if isinstance(agent, RandomAgent):
+                    return True
+    
+        return False
+
 
     

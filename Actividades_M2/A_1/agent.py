@@ -8,7 +8,7 @@ class RandomAgent(Agent):
         unique_id: Agent's ID 
         direction: Randomly chosen direction chosen from one of eight directions
     """
-    def __init__(self, unique_id, model, battery=20):
+    def __init__(self, unique_id, model, battery=100):
         """
         Creates a new random agent.
         Args:
@@ -32,7 +32,7 @@ class RandomAgent(Agent):
 
     def move(self):
 
-        if self.battery<=10:
+        if self.battery<=26:
             print(self.initial_position)
             if self.pos != self.initial_position:
                 # Find the next step to move towards the initial position
