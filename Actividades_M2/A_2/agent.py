@@ -35,7 +35,7 @@ class RandomAgent(Agent):
     def move(self):
 
         
-        if self.battery <= 80 and self.pos != self.initial_position:
+        if self.battery <= 26 and self.pos != self.initial_position:
             # Move towards the initial position
             next_move = self.find_next_step_to_initial()
             if next_move and (self.model.grid.is_cell_empty(next_move) or self.check_for_obstacle(next_move)):
