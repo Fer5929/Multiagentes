@@ -55,7 +55,8 @@ class RandomAgent(Agent):
                 include_center=True
             )
   
-            
+                self.battery -= 1
+
                 # Checks which grid cells are empty
                 freeSpaces = list(map(self.model.grid.is_cell_empty, possible_steps))
 
@@ -107,6 +108,7 @@ class RandomAgent(Agent):
             include_center=True
         )
   
+            self.battery -= 1
             
             # Checks which grid cells are empty
             freeSpaces = list(map(self.model.grid.is_cell_empty, possible_steps))
@@ -151,7 +153,7 @@ class RandomAgent(Agent):
         # Now move:
         self.model.grid.move_agent(self, next_move)
         self.steps_taken += 1
-        self.battery -= 1
+        #self.battery -= 1
         print("steps:",{self.steps})
         
         
@@ -223,8 +225,10 @@ class DirtyAgent(Agent):
     Agent that represents a dirty cell.
     """
 
-    def __init__(self, unique_id, model):
+    def __init__(self, unique_id, model, total=10):
+        #si se quiere agregar más agentes de este tipo cambiar el valor de total manualmente
         super().__init__(unique_id, model)
+        self.total = total
 
     def step(self):
         # Check if the cell exists in the grid
@@ -239,6 +243,7 @@ class DirtyAgent(Agent):
         if random_agents:
             self.model.grid.remove_agent(self)
             self.model.schedule.remove(self)
+            self.total -= 1
 
 class ChargerAgent(Agent):
     """

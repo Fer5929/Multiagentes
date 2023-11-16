@@ -55,7 +55,8 @@ class RandomAgent(Agent):
                 include_center=True
             )
   
-            
+                self.battery -= 1
+
                 # Checks which grid cells are empty
                 freeSpaces = list(map(self.model.grid.is_cell_empty, possible_steps))
 
@@ -107,6 +108,7 @@ class RandomAgent(Agent):
             include_center=True
         )
   
+            self.battery -= 1
             
             # Checks which grid cells are empty
             freeSpaces = list(map(self.model.grid.is_cell_empty, possible_steps))
@@ -151,7 +153,7 @@ class RandomAgent(Agent):
         # Now move:
         self.model.grid.move_agent(self, next_move)
         self.steps_taken += 1
-        self.battery -= 1
+        #self.battery -= 1
         print("steps:",{self.steps})
         
         
