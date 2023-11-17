@@ -33,29 +33,36 @@ class RandomAgent(Agent):
 
 
     def move(self):
+        """
+        Hace lo siguiente: revisa que haya batería disponible para moverse, en este caso se usó el valor de 26 dado que es el valor entero de la hipotenusa de una grid de 15 x10
+        Si la batería es menor a 26 y la posición es diferente a la posición inicial, se mueve hacia la posición inicial
+        Si la batería es menor a 100 y la posición es igual a la posición inicial, se carga la batería hasta que llegue a 100
+        Si la batería es mayor a 100, se mueve aleatoriamente revisando si hay obstáculos que le impidan moverse al igual 
+        que si hay alguna celda sucia, si es el caso se prioriza la limpieza de la misma siempre y cuando la batería sea mayor a 26
 
+        """
         
         if self.battery <= 26 and self.pos != self.initial_position:
             # Move towards the initial position
-            next_move = self.find_next_step_to_initial()
+            next_move = self.regresa() #llama al método para calcular como regresar a la posición inicial
             if next_move and (self.model.grid.is_cell_empty(next_move) or self.check_for_obstacle(next_move)):
                 self.model.grid.move_agent(self, next_move)
-                self.battery -= 1
-                self.steps += 1
+                self.battery -= 1#disminuye la batería
+                self.steps += 1#suma un paso al contador de pasos
         elif self.battery < 100 and self.pos == self.initial_position:
             # If at initial position, charge battery by 5 units per step, until it reaches 100
-            print("charging",{self.battery})
+            print("charging",{self.battery})#imprime la batería antes y después en la consola de cada agente
             self.battery = min(100, self.battery + 5)
             print("charging",{self.battery})
             if self.battery >= 100:
-                # Determine if the agent can move in the direction that was chosen.
+                # Si hay batería entonces se puede mover
                 possible_steps = self.model.grid.get_neighborhood(
                 self.pos,
                 moore=True,
                 include_center=True
             )
   
-                self.battery -= 1
+                self.battery -= 1#como se va a mover se quita uno de batería
 
                 # Checks which grid cells are empty
                 freeSpaces = list(map(self.model.grid.is_cell_empty, possible_steps))
@@ -68,35 +75,40 @@ class RandomAgent(Agent):
 
                 # Check if there are any valid moves
                 if valid_moves:
-                    # Check if there's a DirtyAgent in the valid moves
+                    # Revisa si hay DirtyAgents en los movimientos válidos
                     dirty_move = [move for move in valid_moves if any(isinstance(agent, DirtyAgent) for agent in self.model.grid.get_cell_list_contents(move))]
 
+                    #clean es una variable que nos ayuda a quedarnos un step en el mismo espacio "limpiando"
                     if dirty_move:
-                        if self.clean == 1:
-                            next_move = self.pos
-                            self.clean=0
+                        #Si hay una celda vecina sucia
+
+                        if self.clean == 1:#significa que se está limpiando 
+                            next_move = self.pos#se queda ahí limpiando
+                            self.clean=0#ya acabó de limpiar
                         else:
-                        # Prioritize moving to a cell with a DirtyAgent
+                        # de lo contrario ve a moverte a la celda a limpiar 
                             next_move = self.random.choice(dirty_move)
-                            self.clean = 1
-                            self.steps += 1
+                            self.clean = 1.#se cambia el estado a limpiando
+                            self.steps += 1#se aumenta porque si se mueve 
                         
                     else:
+                        #sino hay un DirtyAgent cerca 
                         if self.clean == 0:
-                            # If no DirtyAgents in valid moves, move randomly to an empty cell
+                            # sino se esta limpiando actualmente muevete a una celda libre
                             empty_cells = [move for move in valid_moves if self.model.grid.is_cell_empty(move)]
                             next_move = self.random.choice(empty_cells) if empty_cells else self.pos
                             self.steps += 1
                         elif self.clean == 1:
+                            #si se esta limpiando quédate ahí
                             next_move = self.pos
-                            self.clean = 0
+                            self.clean = 0#acabó de limpiar
                             
                         
                 else:
-                # If there are no valid moves, stay in the current cell
+                # En caso de que no haya manera de moverse quédate ahí
                     next_move = self.pos
             else:
-                next_move = self.initial_position
+                next_move = self.initial_position #si no está en la posición inicial se mueve a ella
 
                         
                         
@@ -108,7 +120,7 @@ class RandomAgent(Agent):
             include_center=True
         )
   
-            self.battery -= 1
+            self.battery -= 1#disminuye la batería
             
             # Checks which grid cells are empty
             freeSpaces = list(map(self.model.grid.is_cell_empty, possible_steps))
@@ -121,9 +133,10 @@ class RandomAgent(Agent):
 
             # Check if there are any valid moves
             if valid_moves:
-                # Check if there's a DirtyAgent in the valid moves
+                #Revisa si hay DirtyAgents en los movimientos válidos
                 dirty_move = [move for move in valid_moves if any(isinstance(agent, DirtyAgent) for agent in self.model.grid.get_cell_list_contents(move))]
 
+                #misma lógica anterior
                 if dirty_move:
                     if self.clean == 1:
                         next_move = self.pos
@@ -145,7 +158,6 @@ class RandomAgent(Agent):
                             
                         
             else:
-            # If there are no valid moves, stay in the current cell
                 next_move = self.pos
 
        
@@ -157,38 +169,42 @@ class RandomAgent(Agent):
         print("steps:",{self.steps})
         
         
-    def find_next_step_to_initial(self):
-        # Implement BFS to find the next step towards the initial position
-        visited = set()
-        q = Queue()
-        q.put(self.pos)
-        visited.add(self.pos)
+    def regresa(self):
+        """
+        Se usó la lógica de BFS para encontrar el camino de regreso al cargador. 
+        """
+        visited = set()#se guarda los nodos visitados
+        q = Queue()#se crea una queue
+        q.put(self.pos)#se agrega la posición actual
+        visited.add(self.pos)#se agrega a los visitados
+        #ahora lo que se hace es recorrer el grafo hasta encontrar la posición inicial
 
-        while not q.empty():
-            current_pos = q.get()
+        while not q.empty():#mientras la queue no esté vacía
+            current_pos = q.get()#se obtiene el primer elemento de la queue
 
             for next_pos in self.model.grid.get_neighborhood(
                 current_pos,
                 moore=True,
                 include_center=True
             ):
-                if next_pos not in visited:
-                    visited.add(next_pos)
-                    q.put(next_pos)
+                if next_pos not in visited:#si no está en los visitados
+                    visited.add(next_pos)#se agrega a los visitados
+                    q.put(next_pos)#se agrega a la queue
 
-                    # Check if the next position is closer to the initial position
+                    #Revisa si la posición a la que se va a mover es menor a la posición actual, si no hay obstáculos y si no hay un RandomAgent en esa posición
                     if self.calculate_distance(next_pos) < self.calculate_distance(current_pos) and not self.check_for_obstacle(next_pos) and not self.check_for_RandomAgent(next_pos):
-                        return next_pos
+                        return next_pos#regresa la posición a la que se va a mover
 
-        # If no valid step is found, return the current position
+        # sino se queda ahí y se repite el proceso
         return self.pos
 
 
     def calculate_distance(self, pos):
+        #cálculo de la distancia entre dos puntos
         return abs(pos[0] - self.initial_position[0]) + abs(pos[1] - self.initial_position[1])
     
     def check_for_obstacle(self, pos):
-        # Check if the position contains an obstacle agent
+        # Revisa si hay algún obstáculo en la posición 
         cell_contents = self.model.grid.get_cell_list_contents([pos])
         for agent in cell_contents:
             if isinstance(agent, ObstacleAgent):
@@ -196,7 +212,7 @@ class RandomAgent(Agent):
         return False
 
     def check_for_RandomAgent(self, pos):
-        # Check if the position contains an Random agent
+        # Lo mismo pero para random agent
         cell_contents = self.model.grid.get_cell_list_contents([pos])
         for agent in cell_contents:
             if isinstance(agent, RandomAgent):
@@ -225,25 +241,23 @@ class DirtyAgent(Agent):
     Agent that represents a dirty cell.
     """
 
-    def __init__(self, unique_id, model, total=10):
-        #si se quiere agregar más agentes de este tipo cambiar el valor de total manualmente
+    def __init__(self, unique_id, model ):
         super().__init__(unique_id, model)
-        self.total = total
+        
 
     def step(self):
-        # Check if the cell exists in the grid
+        
         if self.model.grid.is_cell_empty(self.pos):
             return
 
-        # Check if there is any RandomAgent sharing the cell with the DirtyAgent
+        #Si hay una roomba en la misma cedla se elimina ese DirtyAgent
         agents_in_cell = self.model.grid.get_cell_list_contents([self.pos])
         random_agents = [agent for agent in agents_in_cell if isinstance(agent, RandomAgent)]
 
-        # If there are RandomAgents in the cell, remove the DirtyAgent
+        
         if random_agents:
             self.model.grid.remove_agent(self)
             self.model.schedule.remove(self)
-            self.total -= 1
 
 class ChargerAgent(Agent):
     """
