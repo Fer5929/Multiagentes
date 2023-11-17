@@ -60,9 +60,16 @@ class DirtElement(TextElement):
         remaining_dirty = total_dirty  # Calculate the remaining dirty agents
         percentage_remaining = (remaining_dirty / initial_dirty) * 100
         return f"Dirt Remaining: {percentage_remaining:.2f}%"
+#porcentaje de obstaculos en el grid
+class TotalObstacles (TextElement):
+    def render(self, model):
+        total_obstacles = sum(1 for agent in model.schedule.agents if isinstance(agent, ObstacleAgent))
+        grid_area=model.grid.width*model.grid.height
+        percentage_obstacles=(total_obstacles/grid_area)*100
+        return f"Obstacles covering grid: {percentage_obstacles:.2f}%"
 
 #se crea el servidor con todos los elementos 
-server = ModularServer(RandomModel, [TimeElement(),DirtElement(),grid, bar_chart,dirty_chart], "Rooooooombaaaaa", model_params)
+server = ModularServer(RandomModel, [TimeElement(),DirtElement(),TotalObstacles(),grid, bar_chart,dirty_chart], "Rooooooombaaaaa", model_params)
                        
 server.port = 8521 # The default
 server.launch()
